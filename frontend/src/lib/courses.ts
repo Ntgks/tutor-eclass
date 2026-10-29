@@ -116,3 +116,40 @@ export async function getMyCourses(): Promise<Course[]> {
 
   return response.json();
 }
+
+export async function getCourse(courseId: string): Promise<Course> {
+    const response = await fetch(
+        `/api/courses/${encodeURIComponent(courseId)}`,
+        {
+            credentials: "same-origin",
+            cache: "no-store",
+            headers: {
+                Accept: "application/json",
+            },
+        }
+    );
+
+    if(response.status === 401){
+        throw new Error("Χρειάζεται να συνδεθείς ξανά.");
+    }
+
+    if(response.status === 403){
+        throw new Error("Δεν επιτρέπεται η πρόσβαση στο μάθημα.");
+    }
+
+    if(response.status === 404){
+        throw new Error("Το μάθημα δεν βρέθηκε ή δεν έχεις πρόσβαση.");
+    }
+
+    if(!response.ok){
+        throw new Error("Δεν ήταν δυνατή η φόρτωση του μαθήματος.");
+    }
+
+    const contentType = response.headers.get("content-type");
+
+    if(!contentType?.includes("application/json")){
+        throw new Error("Η υπηρεσία επέστρεψε μη αναμενόμενη απάντηση.");
+    }
+
+    return response.json();
+}

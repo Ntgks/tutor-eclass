@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { getMyCourses } from "@/lib/courses";
 import type { Course } from "@/types/course";
 
+import Link from "next/link";
+
 export default function MyCourseList() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,14 @@ export default function MyCourseList() {
           key={course.id}
           className="rounded-lg border border-slate-200 bg-white p-4"
         >
-          <h2 className="font-semibold">{course.title}</h2>
+          <h2 className="font-semibold">
+            <Link
+              href={`/courses/${course.id}`}
+              className="text-indigo-700 hover:underline"
+            >
+              {course.title}
+            </Link>
+          </h2>
 
           {course.description && (
             <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
