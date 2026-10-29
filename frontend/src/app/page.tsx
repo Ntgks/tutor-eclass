@@ -2,11 +2,16 @@ import StudentManagement from "@/components/student-management";
 
 import RequireRole from "@/components/require-role";
 
+import LogoutButton from "@/components/logout-button";
+
 export default function Home(){
   return(
     <RequireRole role="ROLE_TEACHER">
       <main className="min-h-screen bg-slate-50 px-6 py-12 text-slate-900">
       <div className="mx-auto max-w-5xl">
+        <div className="mb-6 flex justify-end">
+          <LogoutButton />
+        </div>
         <p className="text-sm font-semibold text-indigo-600">
           Tutor eClass
         </p>

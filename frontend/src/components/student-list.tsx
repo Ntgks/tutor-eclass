@@ -7,6 +7,8 @@ import type { Student } from "@/types/student";
 
 import InvitationButton from "@/components/invitation-button";
 
+import StudentCourses from "@/components/student-courses";
+
 const statusLabels = {
     INVITED:"Αναμονή ενεργοποίησης",
     ACTIVE: "Ενεργός",
@@ -83,6 +85,20 @@ export default function StudentList() {
           {student.status === "INVITED" && (
             <InvitationButton studentId={student.id} />
           )}
+
+          <section
+            className="mt-4 border-t border-slate-200 pt-4"
+            aria-labelledby={`courses-title-${student.id}`}
+          >
+            <h3
+              id={`courses-title-${student.id}`}
+              className="mb-3 font-semibold"
+            >
+              Μαθήματα
+            </h3>
+
+            <StudentCourses studentId={student.id} />
+          </section>
         </li>
       ))}
     </ul>
