@@ -8,6 +8,8 @@ import type { Course } from "@/types/course";
 import CourseMaterials from "@/components/course-materials";
 import { getCurrentUser } from "@/lib/auth";
 
+import CourseAssignments from "@/components/course-assignments";
+
 interface CourseDetailsProps {
   courseId: string;
 }
@@ -84,6 +86,20 @@ export default function CourseDetails({
         <CourseMaterials
             courseId={course.id}
             canUpload={canUpload}
+        />
+      </section>
+
+      <section
+        className="mt-8 border-t border-slate-200 pt-6"
+        aria-labelledby="assignments-title"
+      >
+        <h2 id="assignments-title" className="mb-4 text-xl font-semibold">
+          Εργασίες
+        </h2>
+
+        <CourseAssignments
+          courseId={courseId}
+          canCreate={canUpload}
         />
       </section>
     </article>
