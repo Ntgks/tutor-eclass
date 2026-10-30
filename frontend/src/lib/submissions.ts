@@ -1,5 +1,6 @@
 import type {
   CreateSubmissionRequest,
+  ReviewSubmissionRequest,
   Submission,
 } from "@/types/submission";
 
@@ -116,4 +117,46 @@ export async function createSubmission(
   }
 
   return response.json();
+}
+
+export async function reviewSubmission(
+  courseId: string,
+  assignmentId: string,
+  request: ReviewSubmissionRequest
+): Promise<void> {
+  const csrf = await getCsrfToken();
+
+  const response = await fetch(
+    `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submissions/review`,
+    {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        [csrf.headerName]: csrf.token,
+      },
+      body: JSON.stringify(request),
+    }
+  );
+
+  if (response.status === 400) {
+    throw new Error("Συμπλήρωσε σχόλια έως 10.000 χαρακτήρες.");
+  }
+
+  if (response.status === 401) {
+    throw new Error("Χρειάζεται να συνδεθείς ξανά.");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Η διόρθωση επιτρέπεται μόνο στην καθηγήτρια.");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Η εργασία ή η υποβολή δεν βρέθηκε.");
+  }
+
+  if (response.status !== 204) {
+    throw new Error("Δεν ήταν δυνατή η αποθήκευση της διόρθωσης.");
+  }
 }

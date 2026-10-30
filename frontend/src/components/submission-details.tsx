@@ -2,10 +2,12 @@ import type { Submission } from "@/types/submission";
 
 interface SubmissionDetailsProps {
   submission: Submission;
+  courseId: string;
 }
 
 export default function SubmissionDetails({
   submission,
+  courseId,
 }: SubmissionDetailsProps) {
   return (
     <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -41,6 +43,12 @@ export default function SubmissionDetails({
               <span className="break-all">{file.originalFilename}</span>
               {" — "}
               {Math.ceil(file.sizeBytes / 1024)} KB
+              <a 
+                href={`/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(submission.assignmentId)}/submissions/files/${encodeURIComponent(file.id)}/download`}
+                className="mt-1 block font-semibold text-indigo-700 hover:underline"
+              >
+                Λήψη συνημμένου
+              </a>
             </li>
           ))}
         </ul>

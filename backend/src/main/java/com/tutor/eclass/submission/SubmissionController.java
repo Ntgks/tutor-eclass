@@ -19,6 +19,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.nio.charset.StandardCharsets;
+
+import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 @RestController
 @RequestMapping(
     "/api/courses/{courseId}/assignments/{assignmentId}/submissions"
@@ -62,5 +73,51 @@ public class SubmissionController {
             assignmentId,
             authentication.getName()
         );
+    }
+
+    @GetMapping("/files/{fileId}/download")
+    public ResponseEntity<Resource> downloadSubmissionFile(
+        @PathVariable UUID courseId,
+        @PathVariable UUID assignmentId,
+        @PathVariable UUID fileId,
+        Authentication authentication){
+            
+            SubmissionFileDownload download = 
+                submissionService.downloadSubmissionFile(
+                    courseId,
+                    assignmentId,
+                    fileId,
+                    authentication.getName()
+                );
+
+            String disposition = ContentDisposition.attachment()
+                .filename(download.originalFilename(), StandardCharsets.UTF_8)
+                .build()
+                .toString();
+            
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .cacheControl(CacheControl.noStore())
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
+                .body(download.resource());
+
+
+    }
+
+    @PutMapping("/review")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('TEACHER')")
+    public void reviewSubmission(
+        @PathVariable UUID courseId,
+        @PathVariable UUID assignmentId,
+        @Valid @RequestBody ReviewSubmissionRequest request,
+        Authentication authentication){
+            
+            submissionService.reviewSubmission(
+                courseId, 
+                assignmentId, 
+                request, 
+                authentication.getName()
+            );
     }
 }

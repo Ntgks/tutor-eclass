@@ -8,6 +8,8 @@ import type { Submission } from "@/types/submission";
 import SubmissionDetails from "@/components/submission-details";
 import SubmissionForm from "@/components/submission-form";
 
+import ReviewSubmissionForm from "@/components/review-submission-form";
+
 interface AssignmentSubmissionProps {
   courseId: string;
   assignmentId: string;
@@ -66,7 +68,24 @@ export default function AssignmentSubmission({
   }
 
   if (submission) {
-    return <SubmissionDetails submission={submission} />;
+    return(
+        <div className="space-y-4">
+            <SubmissionDetails
+                submission={submission}
+                courseId={courseId}
+            />
+
+            {!canSubmit && (
+                <ReviewSubmissionForm
+                    key={submission.id}
+                    courseId={courseId}
+                    assignmentId={assignmentId}
+                    initialFeedback={submission.feedback ?? ""}
+                    onReviewed={() => setVersion((value) => value + 1)}
+                />
+            )}
+        </div>
+    );
   }
 
   if (!canSubmit) {

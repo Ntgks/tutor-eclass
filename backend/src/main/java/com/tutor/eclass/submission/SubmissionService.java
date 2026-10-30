@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.NoSuchFileException;
+
 
 
 @Service
@@ -179,6 +181,71 @@ public class SubmissionService {
                 files
             );
     }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
+    public SubmissionFileDownload downloadSubmissionFile(
+        UUID courseId,
+        UUID assignmentId,
+        UUID fileId,
+        String email){
+            SubmissionResponse submission = getSubmission(
+                courseId, 
+                assignmentId, 
+                email
+            );
+
+            SubmissionFile file = submissionFileRepository
+                .findByIdAndSubmissionId(fileId, submission.id())
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Το συνημμένο δεν βρέθηκε"
+                ));
+            
+            try{
+                return new SubmissionFileDownload(
+                    fileStorageService.load(file.getFileKey()),
+                    file.getOriginalFilename()
+                );
+            } catch (NoSuchFileException exception){
+                throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Το αρχείο δεν βρέθηκε"
+                );
+            } catch (IOException exception){
+                throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Δεν ήταν δυνατή η ανάκτηση του αρχείου",
+                    exception
+                );
+            }
+            
+    }
+
+    @Transactional 
+    @PreAuthorize("hasRole('TEACHER')")
+    public void reviewSubmission(
+        UUID courseId,
+        UUID assignmentId,
+        ReviewSubmissionRequest request,
+        String email){
+            courseService.getCourse(courseId, email);
+
+            assignmentRepository.findByIdAndCourseId(assignmentId, courseId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Η εργασία δεν βρέθηκε"
+                ));
+            
+            Submission submission = submissionRepository
+                .findByAssignmentId(assignmentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Δεν έχει καταχωριστεί ακόμη υποβολή"
+                ));
+
+            submission.review(request.feedback(), Instant.now());
+        }
 
     private void validateFiles(List<MultipartFile> files){
         if (files == null || files.isEmpty() || files.size() > 5){

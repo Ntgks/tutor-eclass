@@ -19,3 +19,7 @@ export interface Submission {
 export interface CreateSubmissionRequest {
   studentComment: string | null;
 }
+
+export interface ReviewSubmissionRequest {
+  feedback: string;
+}

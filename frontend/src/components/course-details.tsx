@@ -10,6 +10,9 @@ import { getCurrentUser } from "@/lib/auth";
 
 import CourseAssignments from "@/components/course-assignments";
 
+import Link from "next/link";
+import LogoutButton from "@/components/logout-button";
+
 interface CourseDetailsProps {
   courseId: string;
 }
@@ -72,6 +75,18 @@ export default function CourseDetails({
 
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href={canUpload ? "/" : "/student"}
+          className="text-sm font-semibold text-indigo-700 hover:underline"
+        >
+          {canUpload
+            ? "Επιστροφή στους μαθητές"
+            : "Επιστροφή στα μαθήματά μου"}
+        </Link>
+
+        <LogoutButton />
+      </div>
       <h1 className="text-2xl font-bold">{course.title}</h1>
 
       <p className="mt-3 whitespace-pre-wrap text-slate-600">

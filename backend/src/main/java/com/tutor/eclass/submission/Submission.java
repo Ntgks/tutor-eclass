@@ -82,4 +82,21 @@ public class Submission {
     public Instant getReviewedAt() {
         return reviewedAt;
     }
+
+    public void review(String feedback, Instant now){
+        if(feedback == null || feedback.isBlank()){
+            throw new IllegalArgumentException(
+                "Απαιτούνται σχόλια διόρθωσης"
+            );
+        }
+
+        if(now == null){
+            throw new IllegalArgumentException(
+                "Απαιτείται ημερομηνία διόρθωσης"
+            );
+        }
+
+        this.feedback = feedback.strip();
+        this.reviewedAt = now;
+    }
 }
