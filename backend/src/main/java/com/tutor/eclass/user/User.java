@@ -122,4 +122,19 @@ public class User {
         this.passwordHash = passwordHash;
         this.status = UserStatus.ACTIVE;
     }
+
+    public void updateStudentDetails(
+        String fullName,
+        String email,
+        String educationLevel){
+            if(role != Role.STUDENT){
+                throw new IllegalStateException(
+                    "Η αλλαγή αφορά μόνο λογαριασμό μαθητή"
+                );
+            }
+
+            this.fullName = fullName;
+            this.email = email;
+            this.educationLevel =educationLevel;
+        }
 }

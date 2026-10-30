@@ -3,7 +3,6 @@ package com.tutor.eclass.course;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,9 +19,8 @@ public class MyCoursesController {
     }
 
     @GetMapping
-    public List<CourseResponse> getMyCourses(
-            Authentication authentication) {
+    public List<CourseResponse> getMyCourses() {
 
-        return courseService.getMyCourses(authentication.getName());
+        return courseService.getMyCourses();
     }
 }

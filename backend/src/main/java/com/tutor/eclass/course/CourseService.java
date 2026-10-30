@@ -12,19 +12,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.tutor.eclass.user.CurrentUserService;
 
 @Service
 public class CourseService {
 
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     public CourseService(
             CourseRepository courseRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            CurrentUserService currentUserService) {
 
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Transactional 
@@ -98,27 +102,22 @@ public class CourseService {
     }
 
     @Transactional(readOnly = true)
-    public List<CourseResponse> getMyCourses(String email){
-        User student = userRepository.findByEmail(email)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Ο λογαριασμός δεν βρέθηκε"
-            ));
-        
-        if(student.getRole() != Role.STUDENT
-            || student.getStatus() != UserStatus.ACTIVE){
-                throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Δεν επιτρέπεται η πρόσβαση στα μαθήματα"
-                );
+    public List<CourseResponse> getMyCourses() {
+        User student = currentUserService.getCurrentUser();
+
+        if (student.getRole() != Role.STUDENT) {
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Δεν επιτρέπεται η πρόσβαση στα μαθήματα"
+            );
         }
 
         return courseRepository.findAllByStudentId(student.getId())
             .stream()
             .map(course -> new CourseResponse(
-                course.getId(), 
-                course.getStudentId(), 
-                course.getTitle(), 
+                course.getId(),
+                course.getStudentId(),
+                course.getTitle(),
                 course.getDescription()
             ))
             .toList();
@@ -126,18 +125,7 @@ public class CourseService {
 
     @Transactional(readOnly = true)
     public CourseResponse getCourse(UUID courseId, String email){
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Ο λογαριασμός δεν βρέθηκε"
-            ));
-
-        if(user.getStatus() != UserStatus.ACTIVE){
-            throw new ResponseStatusException(
-                HttpStatus.FORBIDDEN,
-                "Ο λογαριασμός δεν είναι ενεργός"
-            );
-        }
+        User user = currentUserService.getCurrentUser();
 
         Course course = (
             user.getRole() == Role.TEACHER

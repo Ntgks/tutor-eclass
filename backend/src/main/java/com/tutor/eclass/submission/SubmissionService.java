@@ -3,7 +3,7 @@ package com.tutor.eclass.submission;
 import com.tutor.eclass.assignment.AssignmentRepository;
 import com.tutor.eclass.course.CourseService;
 import com.tutor.eclass.storage.FileStorageService;
-import com.tutor.eclass.user.UserRepository;
+import com.tutor.eclass.user.CurrentUserService;
 
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import com.tutor.eclass.user.Role;
 import com.tutor.eclass.user.User;
-import com.tutor.eclass.user.UserStatus;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -44,7 +43,7 @@ public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final SubmissionFileRepository submissionFileRepository;
     private final AssignmentRepository assignmentRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
     private final CourseService courseService;
     private final FileStorageService fileStorageService;
 
@@ -55,14 +54,14 @@ public class SubmissionService {
             SubmissionRepository submissionRepository,
             SubmissionFileRepository submissionFileRepository,
             AssignmentRepository assignmentRepository,
-            UserRepository userRepository,
+            CurrentUserService currentUserService,
             CourseService courseService,
             FileStorageService fileStorageService) {
 
         this.submissionRepository = submissionRepository;
         this.submissionFileRepository = submissionFileRepository;
         this.assignmentRepository = assignmentRepository;
-        this.userRepository = userRepository;
+        this.currentUserService = currentUserService;
         this.courseService = courseService;
         this.fileStorageService = fileStorageService;
     }
@@ -76,7 +75,7 @@ public class SubmissionService {
         List<MultipartFile> files,
         String email){
 
-            User student = getActiveStudent(email);
+            User student = getActiveStudent();
 
             courseService.getCourse(courseId, email);
             validateFiles(files);
@@ -309,21 +308,16 @@ public class SubmissionService {
         );
     }
 
-    private User getActiveStudent(String email){
-        User student = userRepository.findByEmail(email)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "Ο λογαριασμός δεν βρέθηκε"
-            ));
+    private User getActiveStudent(){
+        User student = currentUserService.getCurrentUser();
 
-        if(student.getRole() != Role.STUDENT
-            || student.getStatus() != UserStatus.ACTIVE){
-                throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Η υποβολή επιτρέπεται μόνο σε ενεργό μαθητή"
-                );
+        if (student.getRole() != Role.STUDENT) {
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Η υποβολή επιτρέπεται μόνο σε ενεργό μαθητή"
+            );
         }
-
+        
         return student;
     }
 

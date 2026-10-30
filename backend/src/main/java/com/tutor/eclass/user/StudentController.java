@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.UUID;
+
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @RestController 
@@ -40,6 +45,13 @@ public class StudentController {
     public List<StudentResponse> getStudents(){
         return userService.getStudents();
     }
-    
+
+    @PutMapping("/{studentId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public StudentResponse updateStudent(
+        @PathVariable UUID studentId,
+        @Valid @RequestBody UpdateStudentRequest request){
+            return userService.updateStudent(studentId, request);
+        }
     
 }

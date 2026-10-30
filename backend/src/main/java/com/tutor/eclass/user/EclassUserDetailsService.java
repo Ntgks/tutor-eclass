@@ -34,10 +34,11 @@ public class EclassUserDetailsService implements UserDetailsService{
                 );
             }
 
-        return org.springframework.security.core.userdetails.User
-            .withUsername(user.getEmail())
-            .password(user.getPasswordHash())
-            .roles(user.getRole().name())
-            .build();
+        return new EclassUserDetails(
+            user.getId(),
+            user.getEmail(),
+            user.getPasswordHash(),
+            user.getRole()
+        );
     }
 }

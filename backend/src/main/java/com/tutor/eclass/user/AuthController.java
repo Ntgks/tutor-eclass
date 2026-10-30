@@ -14,10 +14,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private final CurrentUserService currentUserService;
+
+    public AuthController(CurrentUserService currentUserService) {
+        this.currentUserService = currentUserService;
+    }
+
     @GetMapping("/me")
-    public Map<String, Object> me(Authentication authentication){
+    public Map<String, Object> me(Authentication authentication) {
+        User user = currentUserService.getCurrentUser();
+
         return Map.of(
-            "email", authentication.getName(),
+            "email", user.getEmail(),
             "authorities", authentication.getAuthorities()
                 .stream()
                 .map(authority -> authority.getAuthority())
