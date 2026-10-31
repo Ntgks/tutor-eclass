@@ -9,6 +9,8 @@ import InvitationButton from "@/components/invitation-button";
 
 import StudentCourses from "@/components/student-courses";
 
+import EditStudentForm from "@/components/edit-student-form";
+
 const statusLabels = {
     INVITED:"Αναμονή ενεργοποίησης",
     ACTIVE: "Ενεργός",
@@ -19,6 +21,21 @@ export default function StudentList() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const[editingStudentId, setEditingStudentId] = 
+    useState<string | null>(null);
+  
+  function handleStudentUpdated(updatedStudent: Student){
+    setStudents((current) => 
+      current.map((student) =>
+        student.id === updatedStudent.id ? updatedStudent : student
+      )
+    );
+
+    setEditingStudentId((current) =>
+      current === updatedStudent.id ? null : current
+    );
+  }
 
   useEffect(() => {
     let active = true;
@@ -81,6 +98,24 @@ export default function StudentList() {
           <p className="mt-1 text-sm font-medium text-indigo-700">
             {statusLabels[student.status]}
           </p>
+
+          <div className="mt-4">
+            {editingStudentId === student.id ? (
+              <EditStudentForm
+                student={student}
+                onUpdated={handleStudentUpdated}
+                onCancel={() => setEditingStudentId(null)}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditingStudentId(student.id)}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100"
+              >
+                Επεξεργασία στοιχείων
+              </button>
+            )}
+          </div>
 
           {student.status === "INVITED" && (
             <InvitationButton studentId={student.id} />

@@ -13,3 +13,9 @@ export interface CreateStudentRequest{
     email: string;
     educationLevel: string | null;
 }
+
+export interface UpdateStudentRequest {
+  fullName: string;
+  email: string;
+  educationLevel: string | null;
+}
