@@ -95,6 +95,7 @@ export default function AssignmentList({
                 courseId={courseId}
                 assignmentId={assignment.id}
                 canSubmit={canSubmit}
+                dueAt={assignment.dueAt}
             />
           </div>
         </li>

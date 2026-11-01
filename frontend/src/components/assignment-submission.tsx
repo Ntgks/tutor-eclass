@@ -14,17 +14,20 @@ interface AssignmentSubmissionProps {
   courseId: string;
   assignmentId: string;
   canSubmit: boolean;
+  dueAt: string | null;
 }
 
 export default function AssignmentSubmission({
   courseId,
   assignmentId,
   canSubmit,
+  dueAt,
 }: AssignmentSubmissionProps) {
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+  const [expired, setExpired] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -59,6 +62,22 @@ export default function AssignmentSubmission({
     };
   }, [courseId, assignmentId, version]);
 
+  useEffect(() => {
+    function checkDeadline(){
+      setExpired(
+        dueAt !== null && Date.now() >= new Date(dueAt).getTime()
+      );
+    }
+
+    const initialCheck = window.setTimeout(checkDeadline, 0);
+    const interval = window.setInterval(checkDeadline, 1000);
+
+    return () => {
+      window.clearTimeout(initialCheck);
+      window.clearInterval(interval);
+    };
+  }, [dueAt]);
+
   if (loading) {
     return <p role="status">Φόρτωση υποβολής…</p>;
   }
@@ -90,6 +109,14 @@ export default function AssignmentSubmission({
 
   if (!canSubmit) {
     return <p>Δεν έχει καταχωριστεί ακόμη υποβολή.</p>;
+  }
+
+  if(expired) {
+    return(
+      <p role="status" className="text-sm text-slate-600">
+        Η προθεσμία υποβολής έχει λήξει.
+      </p>
+    );
   }
 
   return (
