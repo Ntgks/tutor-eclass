@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,28 +49,24 @@ public class SubmissionController {
             @PathVariable UUID courseId,
             @PathVariable UUID assignmentId,
             @Valid @RequestPart("metadata") CreateSubmissionRequest request,
-            @RequestPart("files") List<MultipartFile> files,
-            Authentication authentication) {
+            @RequestPart("files") List<MultipartFile> files) {
 
         return submissionService.createSubmission(
             courseId,
             assignmentId,
             request,
-            files,
-            authentication.getName()
+            files
         );
     }
 
     @GetMapping
     public SubmissionResponse getSubmission(
             @PathVariable UUID courseId,
-            @PathVariable UUID assignmentId,
-            Authentication authentication) {
+            @PathVariable UUID assignmentId) {
 
         return submissionService.getSubmission(
             courseId,
-            assignmentId,
-            authentication.getName()
+            assignmentId
         );
     }
 
@@ -79,15 +74,13 @@ public class SubmissionController {
     public ResponseEntity<Resource> downloadSubmissionFile(
         @PathVariable UUID courseId,
         @PathVariable UUID assignmentId,
-        @PathVariable UUID fileId,
-        Authentication authentication){
+        @PathVariable UUID fileId){
             
             SubmissionFileDownload download = 
                 submissionService.downloadSubmissionFile(
                     courseId,
                     assignmentId,
-                    fileId,
-                    authentication.getName()
+                    fileId
                 );
 
             String disposition = ContentDisposition.attachment()
@@ -110,14 +103,12 @@ public class SubmissionController {
     public void reviewSubmission(
         @PathVariable UUID courseId,
         @PathVariable UUID assignmentId,
-        @Valid @RequestBody ReviewSubmissionRequest request,
-        Authentication authentication){
+        @Valid @RequestBody ReviewSubmissionRequest request){
             
             submissionService.reviewSubmission(
                 courseId, 
                 assignmentId, 
-                request, 
-                authentication.getName()
+                request
             );
     }
 }

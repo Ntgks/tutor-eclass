@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,13 +22,9 @@ public class AssignmentController {
 
     @GetMapping
     public List<AssignmentResponse> getAssignments(
-            @PathVariable UUID courseId,
-            Authentication authentication) {
+            @PathVariable UUID courseId) {
 
-        return assignmentService.getAssignments(
-            courseId,
-            authentication.getName()
-        );
+        return assignmentService.getAssignments(courseId);
     }
 
     @PostMapping
@@ -37,13 +32,11 @@ public class AssignmentController {
     @PreAuthorize("hasRole('TEACHER')")
     public AssignmentResponse createAssignment(
             @PathVariable UUID courseId,
-            @Valid @RequestBody CreateAssignmentRequest request,
-            Authentication authentication) {
+            @Valid @RequestBody CreateAssignmentRequest request) {
 
         return assignmentService.createAssignment(
             courseId,
-            request,
-            authentication.getName()
+            request
         );
     }
 }

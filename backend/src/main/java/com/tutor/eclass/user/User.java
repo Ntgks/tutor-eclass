@@ -136,5 +136,27 @@ public class User {
             this.fullName = fullName;
             this.email = email;
             this.educationLevel =educationLevel;
+    }
+
+    public void disableStudent(){
+        if (role != Role.STUDENT){
+            throw new IllegalStateException(
+                "Η απενεργοποίηση αφορά μόνο λογαριασμό μαθητή"
+            );
         }
+
+        this.status = UserStatus.DISABLED;
+    }
+
+    public void enableStudent(){
+        if(role != Role.STUDENT || status != UserStatus.DISABLED){
+            throw new IllegalStateException(
+                "Η επανενεργοποίηση αφορά μόνο απενεργοποιημένο μαθητή"
+            );
+        }
+
+        this.status = passwordHash == null || passwordHash.isBlank()
+            ? UserStatus.INVITED
+            : UserStatus.ACTIVE;
+    }
 }

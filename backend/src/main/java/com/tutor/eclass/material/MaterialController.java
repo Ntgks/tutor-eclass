@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,13 +39,9 @@ public class MaterialController {
 
     @GetMapping
     public List<MaterialResponse> getMaterials(
-            @PathVariable UUID courseId,
-            Authentication authentication) {
+            @PathVariable UUID courseId) {
 
-        return materialService.getMaterials(
-            courseId,
-            authentication.getName()
-        );
+        return materialService.getMaterials(courseId);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -55,26 +50,22 @@ public class MaterialController {
     public MaterialResponse uploadMaterials(
         @PathVariable UUID courseId,
         @Valid @RequestPart("metadata") CreateMaterialRequest request,
-        @RequestPart("file") MultipartFile file,
-        Authentication authentication){
+        @RequestPart("file") MultipartFile file){
             return materialService.uploadMaterial(
                 courseId, 
                 request, 
-                file, 
-                authentication.getName()
+                file
             );
     }
 
     @GetMapping("/{materialId}/download")
     public ResponseEntity<Resource> downloadMaterial(
         @PathVariable UUID courseId,
-        @PathVariable UUID materialId,
-        Authentication authentication){
+        @PathVariable UUID materialId){
 
             MaterialDownload download = materialService.downloadMaterial(
                 courseId, 
-                materialId, 
-                authentication.getName()
+                materialId
             );
 
             String disposition = ContentDisposition.attachment()

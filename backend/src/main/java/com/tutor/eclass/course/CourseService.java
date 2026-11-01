@@ -124,7 +124,7 @@ public class CourseService {
     }
 
     @Transactional(readOnly = true)
-    public CourseResponse getCourse(UUID courseId, String email){
+    public CourseResponse getCourse(UUID courseId){
         User user = currentUserService.getCurrentUser();
 
         Course course = (

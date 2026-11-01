@@ -121,3 +121,87 @@ export async function updateStudent(
 
   return response.json();
 }
+
+export async function disableStudent(studentId: string): Promise<Student> {
+  const csrf = await getCsrfToken();
+
+  const response = await fetch(
+    `/api/students/${encodeURIComponent(studentId)}/disable`,
+    {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        [csrf.headerName]: csrf.token,
+      },
+    }
+  );
+
+  if (response.status === 401) {
+    throw new Error("Χρειάζεται να συνδεθείς ξανά.");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Η απενεργοποίηση επιτρέπεται μόνο στην καθηγήτρια.");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Ο μαθητής δεν βρέθηκε.");
+  }
+
+  if (response.status !== 200) {
+    throw new Error("Δεν ήταν δυνατή η απενεργοποίηση του μαθητή.");
+  }
+
+  const contentType = response.headers.get("content-type");
+
+  if (!contentType?.includes("application/json")) {
+    throw new Error("Η υπηρεσία επέστρεψε μη αναμενόμενη απάντηση.");
+  }
+
+  return response.json();
+}
+
+export async function enableStudent(studentId: string): Promise<Student> {
+  const csrf = await getCsrfToken();
+
+  const response = await fetch(
+    `/api/students/${encodeURIComponent(studentId)}/enable`,
+    {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        [csrf.headerName]: csrf.token,
+      },
+    }
+  );
+
+  if (response.status === 401) {
+    throw new Error("Χρειάζεται να συνδεθείς ξανά.");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Η επανενεργοποίηση επιτρέπεται μόνο στην καθηγήτρια.");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Ο μαθητής δεν βρέθηκε.");
+  }
+
+  if (response.status === 409) {
+    throw new Error("Ο μαθητής δεν είναι απενεργοποιημένος. Ανανέωσε τη σελίδα.");
+  }
+
+  if (response.status !== 200) {
+    throw new Error("Δεν ήταν δυνατή η επανενεργοποίηση του μαθητή.");
+  }
+
+  const contentType = response.headers.get("content-type");
+
+  if (!contentType?.includes("application/json")) {
+    throw new Error("Η υπηρεσία επέστρεψε μη αναμενόμενη απάντηση.");
+  }
+
+  return response.json();
+}

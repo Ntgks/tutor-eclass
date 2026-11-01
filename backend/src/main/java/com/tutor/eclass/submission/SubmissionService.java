@@ -72,12 +72,11 @@ public class SubmissionService {
         UUID courseId,
         UUID assignmentId,
         CreateSubmissionRequest request,
-        List<MultipartFile> files,
-        String email){
+        List<MultipartFile> files){
 
             User student = getActiveStudent();
 
-            courseService.getCourse(courseId, email);
+            courseService.getCourse(courseId);
             validateFiles(files);
 
             Assignment assignment = getAssignmentForSubmission(
@@ -140,10 +139,9 @@ public class SubmissionService {
     @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
     public SubmissionResponse getSubmission(
         UUID courseId,
-        UUID assignmentId,
-        String email){
+        UUID assignmentId){
 
-            courseService.getCourse(courseId, email);
+            courseService.getCourse(courseId);
 
             assignmentRepository.findByIdAndCourseId(assignmentId, courseId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -186,12 +184,10 @@ public class SubmissionService {
     public SubmissionFileDownload downloadSubmissionFile(
         UUID courseId,
         UUID assignmentId,
-        UUID fileId,
-        String email){
+        UUID fileId){
             SubmissionResponse submission = getSubmission(
                 courseId, 
-                assignmentId, 
-                email
+                assignmentId
             );
 
             SubmissionFile file = submissionFileRepository
@@ -226,9 +222,8 @@ public class SubmissionService {
     public void reviewSubmission(
         UUID courseId,
         UUID assignmentId,
-        ReviewSubmissionRequest request,
-        String email){
-            courseService.getCourse(courseId, email);
+        ReviewSubmissionRequest request){
+            courseService.getCourse(courseId);
 
             assignmentRepository.findByIdAndCourseId(assignmentId, courseId)
                 .orElseThrow(() -> new ResponseStatusException(

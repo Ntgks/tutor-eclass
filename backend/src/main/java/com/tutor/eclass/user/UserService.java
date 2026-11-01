@@ -164,4 +164,65 @@ public class UserService {
             student.getEducationLevel()
         );
     }
+
+    @Transactional 
+    @PreAuthorize ("hasRole('TEACHER')")
+    public StudentResponse disableStudent(UUID studentId){
+        User student = userRepository.findByIdForUpdate(studentId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Ο μαθητής δεν βρέθηκε"
+            ));
+
+            if(student.getRole() != Role.STUDENT){
+                throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Ο μαθητής δεν βρέθηκε"
+                );
+            }
+
+            student.disableStudent();
+
+            return new StudentResponse(
+                student.getId(),
+                student.getFullName(),
+                student.getEmail(),
+                student.getStatus(),
+                student.getEducationLevel()
+            );
+    }
+
+    @Transactional 
+    @PreAuthorize ("hasRole('TEACHER')")
+    public StudentResponse enableStudent(UUID studentId){
+        User student = userRepository.findByIdForUpdate(studentId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Ο μαθητής δεν βρέθηκε"
+            ));
+
+        if (student.getRole() != Role.STUDENT) {
+            throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Ο μαθητής δεν βρέθηκε"
+            );
+        }
+
+        if(student.getStatus() != UserStatus.DISABLED){
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Ο μαθητής δεν είναι απενεργοποιημένος"
+            );
+        }
+
+        student.enableStudent();
+
+        return new StudentResponse(
+            student.getId(),
+            student.getFullName(),
+            student.getEmail(),
+            student.getStatus(),
+            student.getEducationLevel()
+        );
+    }
 }

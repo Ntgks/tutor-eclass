@@ -3,7 +3,6 @@ package com.tutor.eclass.course;
 import java.util.UUID;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +20,7 @@ public class CourseDetailsController {
     }
 
     @GetMapping("/{courseId}")
-    public CourseResponse getCourse(
-            @PathVariable UUID courseId,
-            Authentication authentication) {
-
-        return courseService.getCourse(
-            courseId,
-            authentication.getName()
-        );
+    public CourseResponse getCourse(@PathVariable UUID courseId) {
+        return courseService.getCourse(courseId);
     }
 }

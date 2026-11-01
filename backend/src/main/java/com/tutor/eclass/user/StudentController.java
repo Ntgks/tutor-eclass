@@ -52,6 +52,19 @@ public class StudentController {
         @PathVariable UUID studentId,
         @Valid @RequestBody UpdateStudentRequest request){
             return userService.updateStudent(studentId, request);
-        }
-    
+    }
+
+    @PutMapping("/{studentId}/disable")
+    @PreAuthorize("hasRole('TEACHER')")
+    public StudentResponse disableStudent(
+        @PathVariable UUID studentId) {
+            return userService.disableStudent(studentId);
+    }
+
+    @PutMapping("/{studentId}/enable")
+    @PreAuthorize("hasRole('TEACHER')")
+    public StudentResponse enableStudent(
+        @PathVariable UUID studentId) {
+            return userService.enableStudent(studentId);
+    }
 }

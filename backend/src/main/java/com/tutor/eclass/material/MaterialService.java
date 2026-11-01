@@ -43,11 +43,9 @@ public class MaterialService {
     }
 
     @Transactional(readOnly = true)
-    public List<MaterialResponse> getMaterials(
-        UUID courseId,
-        String email){
+    public List<MaterialResponse> getMaterials(UUID courseId) {
 
-            courseService.getCourse(courseId, email);
+            courseService.getCourse(courseId);
 
             return materialRepository
                 .findAllByCourseIdOrderByCreatedAtDesc(courseId)
@@ -68,10 +66,9 @@ public class MaterialService {
     public MaterialResponse uploadMaterial(
         UUID courseId,
         CreateMaterialRequest request,
-        MultipartFile file,
-        String email){
+        MultipartFile file){
 
-            courseService.getCourse(courseId, email);
+            courseService.getCourse(courseId);
             validateFile(file);
 
             String contentType = file.getContentType();
@@ -120,10 +117,9 @@ public class MaterialService {
     @Transactional(readOnly = true)
     public MaterialDownload downloadMaterial(
         UUID courseId,
-        UUID materialId,
-        String email){
+        UUID materialId){
 
-            courseService.getCourse(courseId, email);
+            courseService.getCourse(courseId);
 
             Material material = materialRepository
                 .findByIdAndCourseId(materialId, courseId)

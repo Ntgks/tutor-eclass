@@ -11,6 +11,10 @@ import StudentCourses from "@/components/student-courses";
 
 import EditStudentForm from "@/components/edit-student-form";
 
+import DisableStudentButton from "@/components/disable-student-button";
+
+import EnableStudentButton from "@/components/enable-student-button";
+
 const statusLabels = {
     INVITED:"Αναμονή ενεργοποίησης",
     ACTIVE: "Ενεργός",
@@ -119,6 +123,18 @@ export default function StudentList() {
 
           {student.status === "INVITED" && (
             <InvitationButton studentId={student.id} />
+          )}
+
+          {student.status === "DISABLED" ? (
+            <EnableStudentButton
+              studentId={student.id}
+              onEnabled={handleStudentUpdated}
+            />
+          ) : (
+            <DisableStudentButton
+              studentId={student.id}
+              onDisabled={handleStudentUpdated}
+            />
           )}
 
           <section

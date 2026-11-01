@@ -24,10 +24,9 @@ public class AssignmentService {
 
     @Transactional(readOnly = true)
     public List<AssignmentResponse> getAssignments(
-        UUID courseId,
-        String email){
+        UUID courseId){
 
-            courseService.getCourse(courseId, email);
+            courseService.getCourse(courseId);
 
             return assignmentRepository
                 .findAllByCourseIdOrderByCreatedAtDesc(courseId)
@@ -46,10 +45,9 @@ public class AssignmentService {
     @PreAuthorize("hasRole('TEACHER')")
     public AssignmentResponse createAssignment(
         UUID courseId,
-        CreateAssignmentRequest request,
-        String email){
+        CreateAssignmentRequest request){
 
-            courseService.getCourse(courseId, email);
+            courseService.getCourse(courseId);
 
             String instructions = request.instructions();
 

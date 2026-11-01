@@ -26,6 +26,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+
 @WebMvcTest(StudentController.class)
 @Import(SecurityConfig.class)
 class StudentControllerTest {
@@ -86,5 +88,29 @@ class StudentControllerTest {
             .andExpect(jsonPath("$.passwordHash").doesNotExist());
 
         verify(userService).createStudent(request);
+    }
+
+    @Test 
+    @WithMockUser (roles = "STUDENT")
+    void studentCannotDisableStudent() throws Exception {
+        UUID studentId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/students/" + studentId + "/disable")
+                .with(csrf()))
+            .andExpect(status().isForbidden());
+
+        verifyNoInteractions(userService);
+    }
+
+    @Test 
+    @WithMockUser(roles = "STUDENT")
+    void studentCannotEnableStudent() throws Exception {
+        UUID studentId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/students/" + studentId + "/enable")
+                .with(csrf()))
+            .andExpect(status().isForbidden());
+
+        verifyNoInteractions(userService);
     }
 }
