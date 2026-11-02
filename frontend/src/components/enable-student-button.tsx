@@ -38,7 +38,7 @@ export default function EnableStudentButton({
   }
 
   return (
-    <div className="mt-3">
+    <div className="min-w-0">
       <button
         type="button"
         onClick={handleEnable}

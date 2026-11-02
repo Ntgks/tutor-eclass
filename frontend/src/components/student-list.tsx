@@ -21,6 +21,12 @@ const statusLabels = {
     DISABLED:"Απενεργοποιημένος",
 };
 
+const statusStyles = {
+  INVITED: "bg-amber-50 text-amber-800 ring-amber-200",
+  ACTIVE: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+  DISABLED: "bg-slate-100 text-slate-600 ring-slate-200",
+};
+
 export default function StudentList() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,51 +96,70 @@ export default function StudentList() {
       {students.map((student) => (
         <li
           key={student.id}
-          className="rounded-lg border border-slate-200 bg-white p-4"
+          className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6"
         >
-          <h2 className="font-semibold">{student.fullName}</h2>
-          <p className="text-sm text-slate-600">{student.email}</p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="break-words text-base font-semibold text-slate-900">
+                {student.fullName}
+              </h3>
 
-          <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-1 break-all text-sm text-slate-500">
+                {student.email}
+              </p>
+            </div>
+
+            <span
+              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${
+                statusStyles[student.status]
+              }`}
+            >
+              {statusLabels[student.status]}
+            </span>
+          </div>
+
+          <p className="mt-3 text-sm text-slate-500">
             {student.educationLevel || "Δεν έχει οριστεί επίπεδο σπουδών"}
           </p>
 
-          <p className="mt-1 text-sm font-medium text-indigo-700">
-            {statusLabels[student.status]}
-          </p>
+          <div className="mt-4 flex flex-wrap items-start gap-2">
+            {editingStudentId !== student.id && (
+              <button
+                type="button"
+                onClick={() => setEditingStudentId(student.id)}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Επεξεργασία στοιχείων
+              </button>
+            )}
 
-          <div className="mt-4">
-            {editingStudentId === student.id ? (
+            {student.status === "INVITED" && (
+              <div className="min-w-0 max-w-full">
+                <InvitationButton studentId={student.id} />
+              </div>
+            )}
+
+            {student.status === "DISABLED" ? (
+              <EnableStudentButton
+                studentId={student.id}
+                onEnabled={handleStudentUpdated}
+              />
+            ) : (
+              <DisableStudentButton
+                studentId={student.id}
+                onDisabled={handleStudentUpdated}
+              />
+            )}
+          </div>
+
+          {editingStudentId === student.id && (
+            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
               <EditStudentForm
                 student={student}
                 onUpdated={handleStudentUpdated}
                 onCancel={() => setEditingStudentId(null)}
               />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setEditingStudentId(student.id)}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100"
-              >
-                Επεξεργασία στοιχείων
-              </button>
-            )}
-          </div>
-
-          {student.status === "INVITED" && (
-            <InvitationButton studentId={student.id} />
-          )}
-
-          {student.status === "DISABLED" ? (
-            <EnableStudentButton
-              studentId={student.id}
-              onEnabled={handleStudentUpdated}
-            />
-          ) : (
-            <DisableStudentButton
-              studentId={student.id}
-              onDisabled={handleStudentUpdated}
-            />
+            </div>
           )}
 
           <section

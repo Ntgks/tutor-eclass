@@ -44,12 +44,12 @@ export default function DisableStudentButton({
   }
 
   return (
-    <div className="mt-3">
+    <div className="min-w-0">
       <button
         type="button"
         onClick={handleDisable}
         disabled={submitting}
-        className="rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+        className="rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-700 disabled:opacity-60"
       >
         {submitting ? "Απενεργοποίηση…" : "Απενεργοποίηση μαθητή"}
       </button>

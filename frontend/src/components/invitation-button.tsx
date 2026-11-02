@@ -37,12 +37,12 @@ export default function InvitationButton({
     }
 
     return(
-        <div className="mt-3 space-y-3">
+        <div className="min-w-0 space-y-3">
             <button 
                 type="button"
                 onClick={handleCreateInvitation}
                 disabled={loading}
-                className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-wait disabled:opacity-60"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60"
             >
                 {loading ? "Δημιουργία…" : "Δημιουργία πρόσκλησης"}
             </button>
