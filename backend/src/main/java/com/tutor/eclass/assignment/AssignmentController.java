@@ -39,4 +39,18 @@ public class AssignmentController {
             request
         );
     }
+
+    @PutMapping("/{assignmentId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public AssignmentResponse updateAssignment(
+        @PathVariable UUID courseId,
+        @PathVariable UUID assignmentId,
+        @Valid @RequestBody UpdateAssignmentRequest request) {
+
+            return assignmentService.updateAssignment(
+                courseId,
+                assignmentId,
+                request
+            );
+        }
 }

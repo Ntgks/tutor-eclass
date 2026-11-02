@@ -11,3 +11,9 @@ export interface CreateAssignmentRequest{
     instructions: string | null;
     dueAt: string | null;
 }
+
+export interface UpdateAssignmentRequest {
+  title: string;
+  instructions: string | null;
+  dueAt: string | null;
+}

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getAssignments } from "@/lib/assignments";
 import type { Assignment } from "@/types/assignment";
 import AssignmentSubmission from "@/components/assignment-submission";
+import EditAssignmentForm from "@/components/edit-assignment-form";
 
 interface AssignmentListProps {
   courseId: string;
@@ -18,6 +19,20 @@ export default function AssignmentList({
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingAssignmentId, setEditingAssignmentId] =
+    useState<string | null>(null);
+  
+  function handleAssignmentUpdated(updatedAssignment: Assignment) {
+    setAssignments((current) =>
+      current.map((assignment) =>
+        assignment.id === updatedAssignment.id
+          ? updatedAssignment
+          : assignment
+      ) 
+    );
+
+    setEditingAssignmentId(null);
+  }
 
   useEffect(() => {
     let active = true;
@@ -89,6 +104,28 @@ export default function AssignmentList({
                 })}`
               : "Χωρίς προθεσμία"}
           </p>
+
+          {!canSubmit && (
+            <div className="mt-4">
+              {editingAssignmentId === assignment.id ? (
+                <EditAssignmentForm
+                  key={assignment.id}
+                  courseId={courseId}
+                  assignment={assignment}
+                  onUpdated={handleAssignmentUpdated}
+                  onCancel={() => setEditingAssignmentId(null)}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setEditingAssignmentId(assignment.id)}
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100"
+                >
+                  Επεξεργασία εργασίας
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="mt-4 border-t border-slate-200 pt-4">
             <AssignmentSubmission

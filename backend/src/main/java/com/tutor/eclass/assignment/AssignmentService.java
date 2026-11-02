@@ -9,6 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tutor.eclass.course.CourseService;
 
+import java.time.Instant;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 @Service 
 public class AssignmentService {
     
@@ -75,5 +80,47 @@ public class AssignmentService {
                 savedAssignment.getInstructions(),
                 savedAssignment.getDueAt()
             );
+    }
+
+    @Transactional 
+    @PreAuthorize("hasRole('TEACHER')")
+    public AssignmentResponse updateAssignment(
+        UUID courseId,
+        UUID assignmentId,
+        UpdateAssignmentRequest request){
+            courseService.getCourse(courseId);
+
+            Assignment assignment = assignmentRepository
+                .findByIdAndCourseIdForUpdate(assignmentId, courseId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, 
+                    "Η εργασία δεν βρέθηκε"
+                ));
+
+            Instant deadline = request.dueAt();
+
+            if(deadline != null 
+                && !deadline.equals(assignment.getDueAt())
+                && !deadline.isAfter(Instant.now())) {
+                    throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Η νέα προθεσμία πρέπει να είναι μελλοντική"
+                    );
+            }
+
+            assignment.updateDetails(
+                request.title(),
+                request.instructions(),
+                request.dueAt()
+            );
+
+            return new AssignmentResponse(
+                assignment.getId(),
+                assignment.getCourseId(),
+                assignment.getTitle(),
+                assignment.getInstructions(),
+                assignment.getDueAt()
+            );
+            
         }
 }

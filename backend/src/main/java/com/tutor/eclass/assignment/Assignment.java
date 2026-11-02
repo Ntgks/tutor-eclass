@@ -72,4 +72,22 @@ public class Assignment {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public void updateDetails(
+        String title,
+        String instructions,
+        Instant dueAt){
+
+            if(title == null || title.isBlank()){
+                throw new IllegalArgumentException(
+                    "Απαιτείται τίτλος εργασίας"
+                );
+            }
+
+            this.title = title.strip();
+            this.instructions = instructions == null || instructions.isBlank()
+                ? null
+                : instructions.strip();
+            this.dueAt = dueAt;
+        }
 }
