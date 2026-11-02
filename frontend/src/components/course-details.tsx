@@ -15,6 +15,8 @@ import LogoutButton from "@/components/logout-button";
 
 import EditCourseForm from "@/components/edit-course-form";
 
+import CourseArchiveButton from "@/components/course-archive-button";
+
 interface CourseDetailsProps {
   courseId: string;
 }
@@ -97,6 +99,12 @@ export default function CourseDetails({
       </div>
       <h1 className="text-2xl font-bold">{course.title}</h1>
 
+      {course.archived && (
+        <p className="mt-2 text-sm font-semibold text-slate-600">
+          Αρχειοθετημένο μάθημα
+        </p>
+      )}
+
       <p className="mt-3 whitespace-pre-wrap text-slate-600">
         {course.description || "Δεν έχει προστεθεί περιγραφή."}
       </p>
@@ -119,6 +127,15 @@ export default function CourseDetails({
               Επεξεργασία μαθήματος
             </button>
           )}
+        </div>
+      )}
+
+      {canUpload && (
+        <div className="mt-4">
+          <CourseArchiveButton
+            course={course}
+            onChanged={handleCourseUpdated}
+          />
         </div>
       )}
 

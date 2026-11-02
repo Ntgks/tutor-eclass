@@ -24,6 +24,9 @@ public class Course {
     @Column(name = "description", columnDefinition = "text")
     private String description;
 
+    @Column(name = "archived", nullable = false)
+    private boolean archived;
+
     @Column(name = "created_at", nullable = false,
         insertable = false, updatable = false)
     private Instant createdAt;
@@ -65,6 +68,10 @@ public class Course {
         return createdAt;
     }
 
+    public boolean isArchived() {
+        return archived;
+    }
+
     public void updateDetails(String title, String description){
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException(
@@ -76,5 +83,13 @@ public class Course {
         this.description = description == null || description.isBlank() 
         ? null
         : description.strip();
+    }
+
+    public void archive(){
+        this.archived = true;
+    }
+
+    public void restore(){
+        this.archived = false;
     }
 }

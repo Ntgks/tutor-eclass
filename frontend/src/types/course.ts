@@ -3,6 +3,7 @@ export interface Course{
     studentId: string;
     title: string;
     description: string | null;
+    archived: boolean;
 }
 
 export interface CreateCourseRequest{

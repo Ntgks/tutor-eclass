@@ -72,7 +72,8 @@ public class CourseService {
                 savedCourse.getId(),
                 savedCourse.getStudentId(),
                 savedCourse.getTitle(),
-                savedCourse.getDescription()
+                savedCourse.getDescription(),
+                savedCourse.isArchived()
             );
     }
 
@@ -97,7 +98,8 @@ public class CourseService {
                 course.getId(), 
                 course.getStudentId(), 
                 course.getTitle(), 
-                course.getDescription()
+                course.getDescription(),
+                course.isArchived()
             ))
             .toList();
     }
@@ -119,7 +121,8 @@ public class CourseService {
                 course.getId(),
                 course.getStudentId(),
                 course.getTitle(),
-                course.getDescription()
+                course.getDescription(),
+                course.isArchived()
             ))
             .toList();
     }
@@ -143,7 +146,8 @@ public class CourseService {
             course.getId(),
             course.getStudentId(),
             course.getTitle(),
-            course.getDescription()
+            course.getDescription(),
+            course.isArchived()
         );
     }
 
@@ -154,7 +158,7 @@ public class CourseService {
         UpdateCourseRequest request){
             getCourse(courseId);
 
-            Course course = courseRepository.findById(courseId)
+            Course course = courseRepository.findByIdForUpdate(courseId)
                 .orElseThrow(() -> new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "Το μάθημα δεν βρέθηκε"
@@ -169,7 +173,52 @@ public class CourseService {
                 course.getId(),
                 course.getStudentId(),
                 course.getTitle(),
-                course.getDescription()
+                course.getDescription(),
+                course.isArchived()
             );
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('TEACHER')")
+    public CourseResponse archiveCourse(UUID courseId) {
+        currentUserService.getCurrentUser();
+
+        Course course = courseRepository.findByIdForUpdate(courseId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Το μάθημα δεν βρέθηκε"
+            ));
+
+        course.archive();
+
+        return new CourseResponse(
+            course.getId(),
+            course.getStudentId(),
+            course.getTitle(),
+            course.getDescription(),
+            course.isArchived()
+        );
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('TEACHER')")
+    public CourseResponse restoreCourse(UUID courseId) {
+        currentUserService.getCurrentUser();
+
+        Course course = courseRepository.findByIdForUpdate(courseId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Το μάθημα δεν βρέθηκε"
+            ));
+
+        course.restore();
+
+        return new CourseResponse(
+            course.getId(),
+            course.getStudentId(),
+            course.getTitle(),
+            course.getDescription(),
+            course.isArchived()
+        );
     }
 }

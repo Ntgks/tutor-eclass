@@ -47,4 +47,28 @@ class CourseDetailsControllerTest {
 
         verifyNoInteractions(courseService);
     }
+
+    @Test
+    @WithMockUser(roles = "STUDENT")
+    void studentCannotArchiveCourse() throws Exception {
+        UUID courseId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/courses/{courseId}/archive", courseId)
+                .with(csrf()))
+            .andExpect(status().isForbidden());
+
+        verifyNoInteractions(courseService);
+    }
+
+    @Test
+    @WithMockUser(roles = "STUDENT")
+    void studentCannotRestoreCourse() throws Exception {
+        UUID courseId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/courses/{courseId}/restore", courseId)
+                .with(csrf()))
+            .andExpect(status().isForbidden());
+
+        verifyNoInteractions(courseService);
+    }
 }

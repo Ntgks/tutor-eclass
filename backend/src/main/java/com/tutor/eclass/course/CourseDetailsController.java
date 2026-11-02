@@ -39,5 +39,22 @@ public class CourseDetailsController {
                 courseId,
                 request
             );
-        }
+    }
+
+    @PutMapping("/{courseId}/archive")
+    @PreAuthorize("hasRole('TEACHER')")
+    public CourseResponse archiveCourse(
+            @PathVariable UUID courseId) {
+
+        return courseService.archiveCourse(courseId);
+    }
+
+    @PutMapping("/{courseId}/restore")
+    @PreAuthorize("hasRole('TEACHER')")
+    public CourseResponse restoreCourse(
+            @PathVariable UUID courseId) {
+
+        return courseService.restoreCourse(courseId);
+    }
+
 }

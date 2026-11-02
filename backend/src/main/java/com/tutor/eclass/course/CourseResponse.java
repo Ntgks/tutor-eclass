@@ -6,6 +6,7 @@ public record CourseResponse(
     UUID id,
     UUID studentId,
     String title,
-    String description
+    String description,
+    boolean archived
 ) {
 }
