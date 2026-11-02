@@ -13,6 +13,8 @@ import CourseAssignments from "@/components/course-assignments";
 import Link from "next/link";
 import LogoutButton from "@/components/logout-button";
 
+import EditCourseForm from "@/components/edit-course-form";
+
 interface CourseDetailsProps {
   courseId: string;
 }
@@ -24,6 +26,12 @@ export default function CourseDetails({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [canUpload, setCanUpload] = useState(false);
+  const [editing, setEditing] = useState(false);
+
+  function handleCourseUpdated(updatedCourse: Course) {
+    setCourse(updatedCourse);
+    setEditing(false);
+  }
 
   useEffect(() => {
     let active = true;
@@ -92,6 +100,27 @@ export default function CourseDetails({
       <p className="mt-3 whitespace-pre-wrap text-slate-600">
         {course.description || "Δεν έχει προστεθεί περιγραφή."}
       </p>
+
+      {canUpload && (
+        <div className="mt-4">
+          {editing ? (
+            <EditCourseForm
+              key={course.id}
+              course={course}
+              onUpdated={handleCourseUpdated}
+              onCancel={() => setEditing(false)}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100"
+            >
+              Επεξεργασία μαθήματος
+            </button>
+          )}
+        </div>
+      )}
 
       <section className="mt-8" aria-labelledby="materials-title">
         <h2 id="materials-title" className="mb-4 text-xl font-semibold">

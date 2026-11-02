@@ -64,4 +64,17 @@ public class Course {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public void updateDetails(String title, String description){
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException(
+                "Απαιτείται τίτλος μαθήματος"
+            );
+        }
+
+        this.title = title.strip();
+        this.description = description == null || description.isBlank() 
+        ? null
+        : description.strip();
+    }
 }

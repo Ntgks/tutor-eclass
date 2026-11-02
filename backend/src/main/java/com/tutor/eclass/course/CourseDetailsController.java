@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 @RestController
 @RequestMapping("/api/courses")
 @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
@@ -23,4 +28,16 @@ public class CourseDetailsController {
     public CourseResponse getCourse(@PathVariable UUID courseId) {
         return courseService.getCourse(courseId);
     }
+
+    @PutMapping("/{courseId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public CourseResponse updateCourse(
+        @PathVariable UUID courseId,
+        @Valid @RequestBody UpdateCourseRequest request) {
+
+            return courseService.updateCourse(
+                courseId,
+                request
+            );
+        }
 }

@@ -9,3 +9,8 @@ export interface CreateCourseRequest{
     title: string;
     description: string | null;
 }
+
+export interface UpdateCourseRequest {
+  title: string;
+  description: string | null;
+}

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -144,5 +145,31 @@ public class CourseService {
             course.getTitle(),
             course.getDescription()
         );
+    }
+
+    @Transactional 
+    @PreAuthorize("hasRole('TEACHER')")
+    public CourseResponse updateCourse(
+        UUID courseId,
+        UpdateCourseRequest request){
+            getCourse(courseId);
+
+            Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Το μάθημα δεν βρέθηκε"
+                ));
+
+            course.updateDetails(
+                request.title(), 
+                request.description()
+            );
+
+            return new CourseResponse(
+                course.getId(),
+                course.getStudentId(),
+                course.getTitle(),
+                course.getDescription()
+            );
     }
 }

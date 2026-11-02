@@ -1,4 +1,8 @@
-import type { Course, CreateCourseRequest } from "@/types/course";
+import type {
+  Course,
+  CreateCourseRequest,
+  UpdateCourseRequest,
+} from "@/types/course";
 import { getCsrfToken } from "@/lib/csrf";
 
 export async function getStudentCourses(
@@ -152,4 +156,53 @@ export async function getCourse(courseId: string): Promise<Course> {
     }
 
     return response.json();
+}
+
+export async function updateCourse(
+  courseId: string,
+  request: UpdateCourseRequest
+): Promise<Course> {
+  const csrf = await getCsrfToken();
+
+  const response = await fetch(
+    `/api/courses/${encodeURIComponent(courseId)}`,
+    {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        [csrf.headerName]: csrf.token,
+      },
+      body: JSON.stringify(request),
+    }
+  );
+
+  if (response.status === 400) {
+    throw new Error("Έλεγξε τον τίτλο και την περιγραφή.");
+  }
+
+  if (response.status === 401) {
+    throw new Error("Χρειάζεται να συνδεθείς ξανά.");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Η επεξεργασία επιτρέπεται μόνο στην καθηγήτρια.");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Το μάθημα δεν βρέθηκε ή δεν έχεις πρόσβαση.");
+  }
+
+  if (response.status !== 200) {
+    throw new Error("Δεν ήταν δυνατή η ενημέρωση του μαθήματος.");
+  }
+
+  const contentType = response.headers.get("content-type");
+
+  if (!contentType?.includes("application/json")) {
+    throw new Error("Η υπηρεσία επέστρεψε μη αναμενόμενη απάντηση.");
+  }
+
+  return response.json();
 }
