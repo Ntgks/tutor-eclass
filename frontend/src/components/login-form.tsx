@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 
 import { login, getCurrentUser } from "@/lib/auth";
 
+import Link from "next/link";
+
 export default function LoginForm() {
   const router = useRouter();
   const formId = useId();
@@ -122,6 +124,15 @@ export default function LoginForm() {
 
         {!submitting && <span aria-hidden="true">→</span>}
       </button>
+
+      <div className="text-center">
+        <Link
+          href="/forgot-password"
+          className="rounded text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+        >
+          Ξέχασα τον κωδικό μου
+        </Link>
+      </div>
     </form>
   );
 }

@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
+import jakarta.servlet.DispatcherType;
+
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -25,6 +27,7 @@ public class SecurityConfig {
         HttpSecurity http) throws Exception{
             http
                 .authorizeHttpRequests(auth -> auth
+                    .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                     .requestMatchers(
                         HttpMethod.GET,
                         "/api/auth/csrf",
@@ -33,7 +36,9 @@ public class SecurityConfig {
                     ).permitAll()
                     .requestMatchers(
                         HttpMethod.POST,
-                        "/api/auth/activate"
+                        "/api/auth/activate",
+                        "/api/auth/forgot-password",
+                        "/api/auth/reset-password"
                     ).permitAll()
                     .anyRequest().authenticated()
                 )

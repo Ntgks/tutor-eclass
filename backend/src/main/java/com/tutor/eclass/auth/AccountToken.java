@@ -52,7 +52,22 @@ public class AccountToken {
             token.expiresAt = expiresAt;
 
             return token;
-        }
+    }
+
+    public static AccountToken createPasswordReset(
+        UUID userId,
+        String tokenHash,
+        Instant expiresAt){
+
+            AccountToken token = new AccountToken();
+            token.id = UUID.randomUUID();
+            token.userId = userId;
+            token.tokenHash = tokenHash;
+            token.purpose = TokenPurpose.PASSWORD_RESET;
+            token.expiresAt = expiresAt;
+
+            return token;
+    }
 
     public UUID getUserId(){
         return userId;
