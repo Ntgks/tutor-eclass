@@ -1,6 +1,7 @@
 package com.tutor.eclass.auth;
 
 public record InvitationResponse(
-    String activationUrl
+    String activationUrl,
+    boolean emailSent
 ) {
 }

@@ -2,6 +2,7 @@ import { getCsrfToken } from "@/lib/csrf";
 
 interface InvitationResponse {
     activationUrl: string;
+    emailSent: boolean;
 }
 
 export async function createInvitation(
