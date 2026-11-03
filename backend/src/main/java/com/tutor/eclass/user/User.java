@@ -159,4 +159,20 @@ public class User {
             ? UserStatus.INVITED
             : UserStatus.ACTIVE;
     }
+
+    public void changePassword(String passwordHash){
+        if (status != UserStatus.ACTIVE){
+            throw new IllegalStateException(
+                "Η αλλαγή κωδικού απαιτεί ενεργό λογαριασμό"
+            );
+        }
+
+        if(passwordHash == null || passwordHash.isBlank()){
+            throw new IllegalArgumentException(
+                "Απαιτείται password hash"
+            );
+        }
+
+        this.passwordHash = passwordHash;
+    }
 }

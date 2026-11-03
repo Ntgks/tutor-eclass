@@ -2,12 +2,14 @@ import StudentManagement from "@/components/student-management";
 import RequireRole from "@/components/require-role";
 import LogoutButton from "@/components/logout-button";
 
+import Link from "next/link";
+
 export default function Home() {
   return (
     <RequireRole role="ROLE_TEACHER">
       <main className="min-h-screen bg-background text-foreground">
         <header className="border-b-4 border-brand-500 bg-brand-900">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
               <div
                 aria-hidden="true"
@@ -27,9 +29,18 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="rounded-lg bg-white">
-              <LogoutButton />
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/account/password"
+                className="rounded-lg border border-white/25 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Αλλαγή κωδικού
+              </Link>
+              <div className="rounded-lg bg-white">
+                <LogoutButton />
+              </div>
             </div>
+
           </div>
         </header>
 

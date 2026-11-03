@@ -84,3 +84,45 @@ export async function logout(): Promise<void> {
     throw new Error("Δεν ήταν δυνατή η αποσύνδεση.");
   }
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export async function changePassword(
+  request: ChangePasswordRequest
+): Promise<void> {
+  const csrf = await getCsrfToken();
+
+  const response = await fetch("/api/auth/password", {
+    method: "PUT",
+    credentials: "same-origin",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      [csrf.headerName]: csrf.token,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (response.status === 400) {
+    throw new Error(
+      "Έλεγξε τον τωρινό κωδικό. Ο νέος πρέπει να έχει 12–64 χαρακτήρες και έως 72 bytes."
+    );
+  }
+
+  if (response.status === 401) {
+    throw new Error("Χρειάζεται να συνδεθείς ξανά.");
+  }
+
+  if (response.status === 403) {
+    throw new Error(
+      "Δεν επιτρέπεται η αλλαγή κωδικού. Ανανέωσε τη σελίδα και δοκίμασε ξανά."
+    );
+  }
+
+  if (response.status !== 204) {
+    throw new Error("Δεν ήταν δυνατή η αλλαγή του κωδικού.");
+  }
+}

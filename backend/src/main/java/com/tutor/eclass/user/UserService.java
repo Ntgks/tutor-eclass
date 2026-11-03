@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 
 
 @Service 
@@ -20,12 +21,15 @@ public class UserService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CurrentUserService currentUserService;
 
     public UserService(
         UserRepository userRepository, 
-        PasswordEncoder passwordEncoder){
+        PasswordEncoder passwordEncoder,
+        CurrentUserService currentUserService){
             this.userRepository = userRepository;
             this.passwordEncoder = passwordEncoder;
+            this.currentUserService = currentUserService;
     }
 
     @Transactional 
@@ -224,5 +228,48 @@ public class UserService {
             student.getStatus(),
             student.getEducationLevel()
         );
+    }
+
+    @Transactional 
+    @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
+    public void changePassword(ChangePasswordRequest request){
+        User currentUser = currentUserService.getCurrentUser();
+
+        User user = userRepository.findByIdForUpdate(currentUser.getId())
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Ο χρήστης δεν βρέθηκε"
+            ));
+
+        if(user.getStatus() != UserStatus.ACTIVE){
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Ο χρήστης δεν είναι ενεργός"
+            );
+        }
+
+        if(request.currentPassword()
+            .getBytes(StandardCharsets.UTF_8).length > 72
+            || request.newPassword()
+                .getBytes(StandardCharsets.UTF_8).length > 72){
+                    throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Ο κωδικός υπερβαίνει το όριο των 72 bytes"
+                    );
+                }            
+        if(user.getPasswordHash() == null
+            || !passwordEncoder.matches(
+                request.currentPassword(), 
+                user.getPasswordHash()
+            )){
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Ο τωρινός κωδικός δεν είναι σωστός"
+                );
+            }
+        
+            user.changePassword(
+                passwordEncoder.encode(request.newPassword())
+            );
     }
 }
