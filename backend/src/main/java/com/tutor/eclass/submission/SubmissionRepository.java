@@ -7,6 +7,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
+
 public interface SubmissionRepository
         extends JpaRepository<Submission, UUID> {
 
@@ -26,4 +29,21 @@ public interface SubmissionRepository
         ORDER BY s.submittedAt ASC, s.id ASC
     """)
     List<PendingReviewResponse> findPendingReviews();
+
+    @Query("""
+        SELECT new com.tutor.eclass.submission.RecentReviewResponse(
+            a.id, a.title, c.id, c.title, s.reviewedAt   
+        )
+        FROM Submission s, Assignment a, Course c
+        WHERE s.assignmentId = a.id  
+            AND a.courseId = c.id   
+            AND s.studentId = :studentId
+            AND c.studentId = :studentId
+            AND s.reviewedAt IS NOT NULL
+        ORDER BY s.reviewedAt DESC, s.id ASC
+    """)
+    List<RecentReviewResponse> findRecentReviewForStudent(
+        @Param("studentId") UUID studentId,
+        Pageable pageable
+    );
 }

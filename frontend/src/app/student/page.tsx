@@ -3,6 +3,7 @@ import LogoutButton from "@/components/logout-button";
 import MyCourseList from "@/components/my-course-list";
 import Link from "next/link";
 import UpcomingAssignments from "@/components/upcoming-assignments";
+import RecentReviews from "@/components/recent-reviews";
 
 export default function StudentPage() {
   return (
@@ -69,6 +70,7 @@ export default function StudentPage() {
           </div>
 
           <UpcomingAssignments />
+          <RecentReviews />
           
           <section aria-labelledby="my-courses-title">
             <h2
