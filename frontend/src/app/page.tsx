@@ -1,6 +1,7 @@
 import StudentManagement from "@/components/student-management";
 import RequireRole from "@/components/require-role";
 import LogoutButton from "@/components/logout-button";
+import PendingReviews from "@/components/pending-reviews";
 
 import Link from "next/link";
 
@@ -67,6 +68,8 @@ export default function Home() {
             </p>
           </div>
 
+
+          <PendingReviews />
           <StudentManagement />
         </div>
       </main>
