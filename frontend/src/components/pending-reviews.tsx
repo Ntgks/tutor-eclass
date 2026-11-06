@@ -10,6 +10,7 @@ type PendingReview = {
   courseId: string;
   courseTitle: string;
   submittedAt: string;
+  assignmentId: string;
 };
 
 const submittedAtFormat = new Intl.DateTimeFormat("el-GR", {
@@ -88,7 +89,8 @@ export default function PendingReviews() {
             >
               <div className="min-w-0">
                 <Link
-                  href={`/courses/${review.courseId}`}
+                  href={`/courses/${review.courseId}#assignment-${review.assignmentId}`}
+                  scroll={false}
                   className="break-words font-semibold text-brand-700 hover:underline"
                 >
                   {review.assignmentTitle}

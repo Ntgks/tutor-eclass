@@ -16,7 +16,7 @@ public interface SubmissionRepository
 
     @Query("""
         SELECT new com.tutor.eclass.submission.PendingReviewResponse(
-            s.id, u.fullName, a.title, c.id, c.title, s.submittedAt
+            s.id, a.id, u.fullName, a.title, c.id, c.title, s.submittedAt
         )
         FROM Submission s, Assignment a, Course c, User u
         WHERE s.assignmentId = a.id

@@ -87,7 +87,8 @@ export default function UpcomingAssignments() {
             >
               <div className="min-w-0">
                 <Link
-                  href={`/courses/${assignment.courseId}`}
+                  href={`/courses/${assignment.courseId}#assignment-${assignment.assignmentId}`}
+                  scroll={false}
                   className="break-words font-semibold text-brand-700 hover:underline"
                 >
                   {assignment.assignmentTitle}

@@ -67,6 +67,15 @@ export default function AssignmentList({
     };
   }, [courseId]);
 
+  useEffect(() => {
+    if (loading) return ;
+
+    const target = window.location.hash.slice(1);
+    if(!target.startsWith("assignment-")) return;
+
+    document.getElementById(target)?.scrollIntoView({ block: "start" });
+  }, [courseId, loading]);
+
   if (loading) {
     return (
       <p role="status" className="text-sm text-slate-500">
@@ -96,6 +105,7 @@ export default function AssignmentList({
       {assignments.map((assignment) => (
         <li
           key={assignment.id}
+          id={`assignment-${assignment.id}`}
           className="rounded-xl border border-brand-900/10 bg-white"
         >
           <div className="rounded-t-xl border-b border-brand-900/10 bg-brand-50/50 px-4 py-3 sm:px-5">
