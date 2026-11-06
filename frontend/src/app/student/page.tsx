@@ -2,6 +2,7 @@ import RequireRole from "@/components/require-role";
 import LogoutButton from "@/components/logout-button";
 import MyCourseList from "@/components/my-course-list";
 import Link from "next/link";
+import UpcomingAssignments from "@/components/upcoming-assignments";
 
 export default function StudentPage() {
   return (
@@ -67,6 +68,8 @@ export default function StudentPage() {
             </p>
           </div>
 
+          <UpcomingAssignments />
+          
           <section aria-labelledby="my-courses-title">
             <h2
               id="my-courses-title"
