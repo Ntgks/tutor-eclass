@@ -73,9 +73,14 @@ public class SupabaseStorageClient {
                 
         }
 
+
         public String store(MultipartFile file) throws IOException{
+            return store(file.getBytes());
+        }
+
+
+        public String store(byte[] content) throws IOException {
             String fileKey = UUID.randomUUID().toString();
-            byte[] content = file.getBytes();
 
             HttpRequest request = requestFor(fileKey)
                 .header("Content-Type", "application/octet-stream")
