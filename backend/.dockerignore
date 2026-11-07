@@ -1,0 +1,7 @@
+target/
+storage/
+.env
+.env.*
+.git/
+*.dump
+*.zip
