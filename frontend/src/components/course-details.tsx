@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 
 import { getCourse } from "@/lib/courses";
@@ -17,14 +17,20 @@ interface CourseDetailsProps {
   courseId: string;
 }
 
+type CourseSection = "materials" | "assignments";
+
 export default function CourseDetails({
   courseId,
 }: CourseDetailsProps) {
+  const sectionId = useId();
+
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [canUpload, setCanUpload] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [activeSection, setActiveSection] =
+    useState<CourseSection>("materials");
 
   function handleCourseUpdated(updatedCourse: Course) {
     setCourse(updatedCourse);
@@ -46,6 +52,12 @@ export default function CourseDetails({
           setCanUpload(
             user?.authorities.includes("ROLE_TEACHER") ?? false
           );
+
+          setActiveSection(
+            window.location.hash.startsWith("#assignment-")
+              ? "assignments"
+              : "materials"
+          );
         }
       } catch (error) {
         if (active) {
@@ -62,18 +74,49 @@ export default function CourseDetails({
       }
     }
 
-    loadCourse();
+    void loadCourse();
 
     return () => {
       active = false;
     };
   }, [courseId]);
 
+  useEffect(() => {
+    let frame: number | undefined;
+
+    function handleHashChange() {
+      const target = window.location.hash.slice(1);
+
+      if (!target.startsWith("assignment-")) return;
+
+      setActiveSection("assignments");
+
+      frame = window.requestAnimationFrame(() => {
+        document.getElementById(target)?.scrollIntoView({
+          block: "start",
+        });
+      });
+    }
+
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+
+      if (frame !== undefined) {
+        window.cancelAnimationFrame(frame);
+      }
+    };
+  }, []);
+
   if (loading) {
     return (
-      <p role="status" className="text-sm text-slate-500">
+      <div
+        role="status"
+        className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500"
+      >
         Φόρτωση μαθήματος…
-      </p>
+      </div>
     );
   }
 
@@ -89,15 +132,22 @@ export default function CourseDetails({
   }
 
   if (!course) {
-    return <p className="text-slate-600">Το μάθημα δεν βρέθηκε.</p>;
+    return (
+      <p className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-600">
+        Το μάθημα δεν βρέθηκε.
+      </p>
+    );
   }
+
+  const sectionButtonClassName =
+    "inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600";
 
   return (
     <article className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={canUpload ? "/" : "/student"}
-          className="inline-flex items-center gap-2 rounded-md py-2 text-sm font-semibold text-brand-700 hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+          className="inline-flex items-center gap-2 rounded-lg py-2 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
         >
           <span aria-hidden="true">←</span>
 
@@ -106,40 +156,50 @@ export default function CourseDetails({
             : "Επιστροφή στα μαθήματά μου"}
         </Link>
 
-        <LogoutButton />
+        <div className="rounded-lg bg-white">
+          <LogoutButton />
+        </div>
       </div>
 
       <section
-        className="rounded-2xl border border-brand-900/10 bg-white shadow-sm"
         aria-labelledby="course-title"
+        className="overflow-hidden rounded-3xl border border-brand-900/10 bg-white"
       >
-        <div className="rounded-t-2xl border-b border-brand-900/10 bg-brand-50/70 p-5 sm:p-7">
-          <div className="mb-3 flex flex-wrap items-center gap-3">
-            <p className="text-xs font-semibold tracking-widest text-brand-700">
-              ΜΑΘΗΜΑ
+        <div className="relative overflow-hidden bg-brand-900 px-6 py-8 text-white sm:px-8 sm:py-10">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 h-56 w-56 rounded-full border-[36px] border-white/5"
+          />
+
+          <div className="relative">
+            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <p className="text-xs font-semibold tracking-widest text-brand-200">
+                Ο ΧΩΡΟΣ ΤΟΥ ΜΑΘΗΜΑΤΟΣ
+              </p>
+
+              {course.archived && (
+                <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-xs font-medium text-white">
+                  Αρχειοθετημένο
+                </span>
+              )}
+            </div>
+
+            <h1
+              id="course-title"
+              className="max-w-4xl break-words text-2xl font-semibold tracking-tight sm:text-4xl"
+            >
+              {course.title}
+            </h1>
+
+            <p className="mt-4 max-w-3xl whitespace-pre-wrap break-words text-sm leading-7 text-brand-100">
+              {course.description ||
+                "Το υλικό και οι εργασίες του μαθήματος συγκεντρωμένα εδώ."}
             </p>
-
-            {course.archived && (
-              <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200">
-                Αρχειοθετημένο
-              </span>
-            )}
           </div>
-
-          <h1
-            id="course-title"
-            className="break-words text-2xl font-semibold tracking-tight text-brand-900 sm:text-3xl"
-          >
-            {course.title}
-          </h1>
-
-          <p className="mt-3 max-w-3xl whitespace-pre-wrap break-words text-sm leading-7 text-slate-600">
-            {course.description || "Δεν έχει προστεθεί περιγραφή."}
-          </p>
         </div>
 
         {canUpload && (
-          <div className="p-5 sm:px-7">
+          <div className="px-6 py-5 sm:px-8">
             <div className="flex flex-wrap items-start gap-3">
               {!editing && (
                 <button
@@ -158,7 +218,7 @@ export default function CourseDetails({
             </div>
 
             {editing && (
-              <div className="mt-4 max-w-2xl rounded-xl border border-brand-200 bg-brand-50/50 p-4">
+              <div className="mt-5 max-w-2xl rounded-2xl border border-brand-200 bg-brand-50/50 p-5">
                 <EditCourseForm
                   key={course.id}
                   course={course}
@@ -171,53 +231,128 @@ export default function CourseDetails({
         )}
       </section>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <section
-          className="min-w-0 rounded-2xl border border-brand-900/10 bg-white p-5 shadow-sm sm:p-6"
-          aria-labelledby="materials-title"
+      <div
+        role="group"
+        aria-label="Περιεχόμενο μαθήματος"
+        className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2"
+      >
+        <button
+          id={`${sectionId}-materials-button`}
+          type="button"
+          aria-pressed={activeSection === "materials"}
+          aria-controls={`${sectionId}-materials`}
+          onClick={() => setActiveSection("materials")}
+          className={`${sectionButtonClassName} ${
+            activeSection === "materials"
+              ? "bg-brand-50 text-brand-900"
+              : "text-slate-500 hover:bg-slate-50 hover:text-brand-900"
+          }`}
         >
-          <div className="mb-5 border-b border-slate-100 pb-4">
-            <h2
-              id="materials-title"
-              className="text-lg font-semibold text-brand-900"
-            >
-              Υλικό μαθήματος
-            </h2>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            className="h-5 w-5"
+          >
+            <path
+              d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M14 3v6h6M8 13h8M8 17h5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
 
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              Σημειώσεις και αρχεία για τη μελέτη σου.
-            </p>
-          </div>
+          Υλικό μαθήματος
+        </button>
 
-          <CourseMaterials
-            courseId={course.id}
-            canUpload={canUpload}
-          />
-        </section>
-
-        <section
-          className="min-w-0 rounded-2xl border border-brand-900/10 bg-white p-5 shadow-sm sm:p-6"
-          aria-labelledby="assignments-title"
+        <button
+          id={`${sectionId}-assignments-button`}
+          type="button"
+          aria-pressed={activeSection === "assignments"}
+          aria-controls={`${sectionId}-assignments`}
+          onClick={() => setActiveSection("assignments")}
+          className={`${sectionButtonClassName} ${
+            activeSection === "assignments"
+              ? "bg-brand-50 text-brand-900"
+              : "text-slate-500 hover:bg-slate-50 hover:text-brand-900"
+          }`}
         >
-          <div className="mb-5 border-b border-slate-100 pb-4">
-            <h2
-              id="assignments-title"
-              className="text-lg font-semibold text-brand-900"
-            >
-              Εργασίες
-            </h2>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            className="h-5 w-5"
+          >
+            <rect x="4" y="4" width="16" height="17" rx="2" />
+            <path
+              d="M9 3h6v4H9zM8 12h8M8 16h5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
 
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              Οδηγίες, προθεσμίες και διορθώσεις.
-            </p>
-          </div>
-
-          <CourseAssignments
-            courseId={course.id}
-            canCreate={canUpload}
-          />
-        </section>
+          Εργασίες
+        </button>
       </div>
+
+      <section
+        id={`${sectionId}-materials`}
+        hidden={activeSection !== "materials"}
+        aria-labelledby={`${sectionId}-materials-title`}
+        className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 sm:p-8"
+      >
+        <div className="mb-6 border-b border-slate-100 pb-5">
+          <h2
+            id={`${sectionId}-materials-title`}
+            className="text-xl font-semibold tracking-tight text-brand-900"
+          >
+            Όλα όσα χρειάζεσαι για τη μελέτη
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Σημειώσεις και αρχεία του μαθήματος, έτοιμα για λήψη.
+          </p>
+        </div>
+
+        <CourseMaterials
+          courseId={course.id}
+          canUpload={canUpload}
+        />
+      </section>
+
+      <section
+        id={`${sectionId}-assignments`}
+        hidden={activeSection !== "assignments"}
+        aria-labelledby={`${sectionId}-assignments-title`}
+        className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 sm:p-8"
+      >
+        <div className="mb-6 border-b border-slate-100 pb-5">
+          <h2
+            id={`${sectionId}-assignments-title`}
+            className="text-xl font-semibold tracking-tight text-brand-900"
+          >
+            Εργασίες και ανατροφοδότηση
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {canUpload
+              ? "Δημιούργησε εργασίες και δες τις λύσεις των μαθητών σου."
+              : "Δες τις οδηγίες, υπέβαλε τις λύσεις σου και διάβασε τις διορθώσεις."}
+          </p>
+        </div>
+
+        <CourseAssignments
+          courseId={course.id}
+          canCreate={canUpload}
+        />
+      </section>
     </article>
   );
 }
