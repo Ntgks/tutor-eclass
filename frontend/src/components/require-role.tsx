@@ -11,17 +11,30 @@ interface RequireRoleProps {
   children: ReactNode;
 }
 
-export default function RequireRole({
+interface AccessCheckProps extends RequireRoleProps {
+  onRetry: () => void;
+}
+
+function AccessCheck({
   role,
   children,
-}: RequireRoleProps) {
+  onRetry,
+}: AccessCheckProps) {
   const router = useRouter();
 
   const [allowed, setAllowed] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [slow, setSlow] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [denied, setDenied] = useState(false);
 
   useEffect(() => {
     let active = true;
+
+    const slowTimer = window.setTimeout(() => {
+      if (active) {
+        setSlow(true);
+      }
+    }, 12000);
 
     async function checkAccess() {
       try {
@@ -52,41 +65,124 @@ export default function RequireRole({
         } else if (isStudent) {
           router.replace("/student");
         } else {
-          setError("Δεν έχεις δικαίωμα πρόσβασης σε αυτή τη σελίδα.");
+          setDenied(true);
         }
-      } catch (error) {
+      } catch {
         if (active) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : "Δεν ήταν δυνατός ο έλεγχος πρόσβασης."
-          );
+          setFailed(true);
         }
+      } finally {
+        window.clearTimeout(slowTimer);
       }
     }
 
-    checkAccess();
+    void checkAccess();
 
     return () => {
       active = false;
+      window.clearTimeout(slowTimer);
     };
   }, [role, router]);
 
-  if (error) {
-    return (
-      <p role="alert" className="p-4 text-sm text-red-700">
-        {error}
-      </p>
-    );
+  if (allowed) {
+    return <>{children}</>;
   }
 
-  if (!allowed) {
-    return (
-      <p role="status" className="p-4 text-sm text-slate-500">
-        Έλεγχος σύνδεσης…
-      </p>
-    );
-  }
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#f5f7f9] px-5 py-10">
+      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-9">
+        <div className="mb-8 flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-900 text-sm font-bold text-white"
+          >
+            TE
+          </span>
 
-  return <>{children}</>;
+          <p className="text-lg font-bold tracking-tight text-brand-900">
+            Tutor eClass
+          </p>
+        </div>
+
+        {denied ? (
+          <div role="alert">
+            <h1 className="text-xl font-semibold text-brand-900">
+              Δεν υπάρχει πρόσβαση
+            </h1>
+
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              Ο λογαριασμός σου δεν έχει δικαίωμα πρόσβασης σε αυτή
+              τη σελίδα.
+            </p>
+
+            <a
+              href="/login"
+              className="mt-6 inline-flex rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+            >
+              Επιστροφή στη σύνδεση
+            </a>
+          </div>
+        ) : failed ? (
+          <>
+            <div role="alert">
+              <h1 className="text-xl font-semibold text-brand-900">
+                Δεν μπορέσαμε να ελέγξουμε τη σύνδεσή σου
+              </h1>
+
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                Η υπηρεσία μπορεί να ξεκινά ακόμη ή να υπάρχει
+                προσωρινό πρόβλημα σύνδεσης. Περίμενε λίγο και
+                δοκίμασε ξανά.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+            >
+              Δοκίμασε ξανά
+              <span aria-hidden="true">↻</span>
+            </button>
+          </>
+        ) : (
+          <div role="status" aria-live="polite">
+            <div className="flex items-center gap-3">
+              <span
+                aria-hidden="true"
+                className="h-5 w-5 shrink-0 rounded-full border-2 border-brand-100 border-t-brand-600 motion-safe:animate-spin"
+              />
+
+              <h1 className="text-xl font-semibold text-brand-900">
+                {slow ? "Χρειάζεται λίγο ακόμη…" : "Έλεγχος σύνδεσης"}
+              </h1>
+            </div>
+
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              {slow
+                ? "Η υπηρεσία ίσως ξεκινά μετά από αδράνεια. Περίμενε λίγο, ο έλεγχος συνεχίζεται."
+                : "Περιμένουμε την επιβεβαίωση του λογαριασμού σου."}
+            </p>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+
+export default function RequireRole({
+  role,
+  children,
+}: RequireRoleProps) {
+  const [attempt, setAttempt] = useState(0);
+
+  return (
+    <AccessCheck
+      key={`${role}-${attempt}`}
+      role={role}
+      onRetry={() => setAttempt((current) => current + 1)}
+    >
+      {children}
+    </AccessCheck>
+  );
 }
