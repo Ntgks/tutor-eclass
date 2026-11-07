@@ -32,6 +32,7 @@ public class SecurityConfig {
                         HttpMethod.GET,
                         "/api/auth/csrf",
                         "/actuator/health",
+                        "/actuator/health/readiness",
                         "/login"
                     ).permitAll()
                     .requestMatchers(
